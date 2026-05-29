@@ -25,7 +25,8 @@ Main variables:
 - `R2_ACCOUNT_STORAGE_METRICS`: set to `0` to skip the REST account storage endpoint.
 - `INFLUX_URL`, `INFLUX_ORG`, `INFLUX_BUCKET`, `INFLUX_TOKEN`: InfluxDB v2 access settings.
 - `R2_LOOKBACK_MINUTES`: lookback window for GraphQL metrics.
-- `DRY_RUN=0`: writes metrics to InfluxDB. Set `DRY_RUN=1` only to print line protocol without writing.
+- `DRY_RUN=0`: writes metrics to InfluxDB. Keep this value in `.env` for normal runs and for the systemd timer.
+- `DRY_RUN=1`: test mode only. The script still fetches Cloudflare metrics and prints Influx line protocol, but it does not send anything to InfluxDB.
 
 ## Cloudflare Permissions
 
@@ -43,11 +44,13 @@ chmod +x cloudflare-r2-metrics.sh
 ./cloudflare-r2-metrics.sh
 ```
 
-To test without writing to InfluxDB:
+To test without writing to InfluxDB, override `DRY_RUN` only for this command:
 
 ```bash
 DRY_RUN=1 ./cloudflare-r2-metrics.sh
 ```
+
+Do not leave `DRY_RUN=1` in `.env` for production or systemd: the timer will run successfully but no data will appear in InfluxDB.
 
 ## systemd Timer
 
