@@ -122,6 +122,20 @@ systemctl status cloudflare-r2-metrics.service
 journalctl -u cloudflare-r2-metrics.service -n 50 --no-pager
 ```
 
+## Grafana Dashboard
+
+A Grafana dashboard is included at `grafana/cloudflare-r2-dashboard.json`.
+
+Import steps:
+
+```bash
+Dashboards > New > Import > Upload dashboard JSON file
+```
+
+During import, select your InfluxDB datasource and set the `bucket` variable to the InfluxDB bucket configured in `.env` as `INFLUX_BUCKET`. The dashboard expects Flux queries and the measurements written by this script.
+
+The dashboard includes total storage, object count, average requests per second, errors, storage by bucket, requests by action/status, and a bucket inventory table.
+
 ## InfluxDB Measurements
 
 - `r2_account_storage`
