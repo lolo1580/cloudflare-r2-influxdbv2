@@ -1,68 +1,69 @@
-# Cloudflare R2 metrics to InfluxDB v2
+# Cloudflare R2 Metrics to InfluxDB v2
 
-Script Bash pour collecter des métriques Cloudflare R2 et les écrire dans InfluxDB v2.
+Bash script to collect Cloudflare R2 metrics and write them to InfluxDB v2.
 
-## Prérequis
+## Requirements
 
 - `bash`
 - `curl`
 - `jq`
-- `date` GNU compatible
+- GNU-compatible `date`
 
 ## Configuration
 
-Copier `.env.example` vers `.env`, puis remplir les valeurs :
+Copy `.env.example` to `.env`, then fill in the values:
 
 ```bash
 cp .env.example .env
 ```
 
-Variables principales :
+Main variables:
 
-- `CLOUDFLARE_ACCOUNT_ID` : ID du compte Cloudflare.
-- `CLOUDFLARE_API_TOKEN` : token API Cloudflare.
-- `CLOUDFLARE_R2_BUCKET` : optionnel, nom du bucket pour les métriques GraphQL par bucket.
-- `INFLUX_URL`, `INFLUX_ORG`, `INFLUX_BUCKET`, `INFLUX_TOKEN` : accès InfluxDB v2.
-- `R2_LOOKBACK_MINUTES` : fenêtre de recherche pour les métriques GraphQL.
-- `DRY_RUN=1` : affiche le line protocol sans écrire dans InfluxDB.
+- `CLOUDFLARE_ACCOUNT_ID`: Cloudflare account ID.
+- `CLOUDFLARE_API_TOKEN`: Cloudflare API token.
+- `CLOUDFLARE_R2_BUCKET`: optional bucket name for per-bucket GraphQL metrics.
+- `R2_ACCOUNT_STORAGE_METRICS`: set to `0` to skip the REST account storage endpoint.
+- `INFLUX_URL`, `INFLUX_ORG`, `INFLUX_BUCKET`, `INFLUX_TOKEN`: InfluxDB v2 access settings.
+- `R2_LOOKBACK_MINUTES`: lookback window for GraphQL metrics.
+- `DRY_RUN=1`: prints line protocol without writing to InfluxDB.
 
-## Permissions Cloudflare
+## Cloudflare Permissions
 
-Le token doit pouvoir lire les métriques R2 du compte. Le script utilise :
+The script can use two Cloudflare APIs:
 
-- `GET /accounts/{account_id}/r2/metrics`
-- `POST /graphql`
+- `POST /graphql` for R2 operations and per-bucket storage metrics. The API token needs account `Analytics Read`.
+- `GET /accounts/{account_id}/r2/metrics` for account-level storage totals. The API token needs `Workers R2 Storage Read`. Set `R2_ACCOUNT_STORAGE_METRICS=0` to skip this endpoint if your token only has analytics access.
 
-Cloudflare expose les métriques R2 via deux jeux de données GraphQL : `r2OperationsAdaptiveGroups` pour les opérations et `r2StorageAdaptiveGroups` pour le stockage. Les métriques GraphQL R2 sont requêtables sur les 31 derniers jours et nécessitent un filtre `accountTag` avec l’ID de compte.
+Cloudflare exposes R2 metrics through two GraphQL datasets: `r2OperationsAdaptiveGroups` for operations and `r2StorageAdaptiveGroups` for storage. GraphQL R2 metrics can be queried for the last 31 days and require an `accountTag` filter with the account ID.
 
-## Utilisation
+## Usage
 
 ```bash
 chmod +x cloudflare-r2-metrics.sh
 ./cloudflare-r2-metrics.sh
 ```
 
-Pour tester sans écrire dans InfluxDB :
+To test without writing to InfluxDB:
 
 ```bash
 DRY_RUN=1 ./cloudflare-r2-metrics.sh
 ```
 
-## Mesures InfluxDB
+## InfluxDB Measurements
 
 - `r2_account_storage`
-  - tags : `storage_class`, `state`
-  - fields : `objects`, `payload_size_bytes`, `metadata_size_bytes`
+  - tags: `storage_class`, `state`
+  - fields: `objects`, `payload_size_bytes`, `metadata_size_bytes`
 
 - `r2_operations`
-  - tags : `bucket`, `action`, `status`, `response_status`
-  - fields : `requests`
+  - tags: `bucket`, `action`, `status`, `response_status`
+  - fields: `requests`
 
 - `r2_bucket_storage`
-  - tags : `bucket`
-  - fields : `object_count`, `upload_count`, `payload_size_bytes`, `metadata_size_bytes`
+  - tags: `bucket`
+  - fields: `object_count`, `upload_count`, `payload_size_bytes`, `metadata_size_bytes`
 
-Sources Cloudflare consultées :
+Cloudflare sources:
 
 - https://developers.cloudflare.com/api/resources/r2/subresources/buckets/subresources/metrics/methods/list/
 - https://developers.cloudflare.com/r2/platform/metrics-analytics/

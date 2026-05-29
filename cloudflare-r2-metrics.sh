@@ -26,20 +26,55 @@ require_cmd() {
   fi
 }
 
+cloudflare_error() {
+  local status="$1"
+  local url="$2"
+  local body="$3"
+
+  printf "Cloudflare request failed: HTTP %s %s\n" "$status" "$url" >&2
+  if [[ -n "$body" ]]; then
+    jq -r ".errors[]?.message // .messages[]?.message // empty" <<<"$body" 2>/dev/null >&2 || true
+  fi
+}
+
 json_post() {
   local url="$1"
   local body="$2"
-  curl -fsS "$url" \
+  local response status response_body newline
+
+  newline=$'\n'
+  response="$(curl -sS -w "\n%{http_code}" "$url" \
     -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
     -H "Content-Type: application/json" \
-    --data "$body"
+    --data "$body")"
+  status="${response##*"$newline"}"
+  response_body="${response%"$newline"*}"
+
+  if [[ "$status" != 2* ]]; then
+    cloudflare_error "$status" "$url" "$response_body"
+    return 1
+  fi
+
+  printf "%s" "$response_body"
 }
 
 api_get() {
   local url="$1"
-  curl -fsS "$url" \
+  local response status body newline
+
+  newline=$'\n'
+  response="$(curl -sS -w "\n%{http_code}" "$url" \
     -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-    -H "Content-Type: application/json"
+    -H "Content-Type: application/json")"
+  status="${response##*"$newline"}"
+  body="${response%"$newline"*}"
+
+  if [[ "$status" != 2* ]]; then
+    cloudflare_error "$status" "$url" "$body"
+    return 1
+  fi
+
+  printf "%s" "$body"
 }
 
 write_influx() {
@@ -81,6 +116,11 @@ iso_now() {
 }
 
 fetch_account_storage_metrics() {
+  if [[ "${R2_ACCOUNT_STORAGE_METRICS:-1}" != "1" ]]; then
+    printf '{"success":true,"result":{}}'
+    return 0
+  fi
+
   api_get "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/r2/metrics"
 }
 
@@ -172,18 +212,19 @@ graphql_to_line_protocol() {
     else
       .data.viewer.accounts[0] as $account
       | [
-          ($account.r2OperationsAdaptiveGroups // [])[]
+          [
+            ($account.r2OperationsAdaptiveGroups // [])[]
           | .dimensions as $d
           | "r2_operations,bucket=\(($d.bucketName // "account")|tag_escape),action=\(($d.actionType // "unknown")|tag_escape),status=\(($d.actionStatus // "unknown")|tag_escape),response_status=\(($d.responseStatusCode // "none")|tag_escape) requests=\(.sum.requests // 0)i \($fallback_ts)"
-        ],
-        [
-          ($account.r2StorageAdaptiveGroups // [])[]
+          ],
+          [
+            ($account.r2StorageAdaptiveGroups // [])[]
           | .dimensions as $d
           | (.dimensions.datetime // null) as $dt
           | "r2_bucket_storage,bucket=\(($d.bucketName // "account")|tag_escape) object_count=\(.max.objectCount // 0)i,upload_count=\(.max.uploadCount // 0)i,payload_size_bytes=\(.max.payloadSize // 0)i,metadata_size_bytes=\(.max.metadataSize // 0)i \(if $dt then ($dt | fromdateiso8601) else $fallback_ts end)"
+          ]
         ]
-      | .[]
-      | .[]
+      | .[][]
     end
   ' <<<"$json"
 }
