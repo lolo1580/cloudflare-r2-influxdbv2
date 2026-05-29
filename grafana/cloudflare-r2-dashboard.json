@@ -482,8 +482,8 @@
       {
         "current": {
           "selected": true,
-          "text": "r2_metrics",
-          "value": "r2_metrics"
+          "text": "CHANGE_ME_INFLUX_BUCKET",
+          "value": "CHANGE_ME_INFLUX_BUCKET"
         },
         "hide": 0,
         "label": "Influx bucket",
@@ -491,11 +491,11 @@
         "options": [
           {
             "selected": true,
-            "text": "r2_metrics",
-            "value": "r2_metrics"
+            "text": "CHANGE_ME_INFLUX_BUCKET",
+            "value": "CHANGE_ME_INFLUX_BUCKET"
           }
         ],
-        "query": "r2_metrics",
+        "query": "CHANGE_ME_INFLUX_BUCKET",
         "skipUrlSync": false,
         "type": "textbox"
       }
