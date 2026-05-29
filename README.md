@@ -51,19 +51,21 @@ DRY_RUN=1 ./cloudflare-r2-metrics.sh
 
 ## systemd Timer
 
-The repository includes a systemd service and timer for running the script every 15 minutes.
+The repository includes a systemd service and timer for running the script every 15 minutes. On the monitoring host, update the checkout and install the units:
 
 ```bash
+git pull
 sudo cp systemd/cloudflare-r2-metrics.service /etc/systemd/system/
 sudo cp systemd/cloudflare-r2-metrics.timer /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now cloudflare-r2-metrics.timer
 ```
 
-Useful checks:
+Useful checks and manual run:
 
 ```bash
 systemctl list-timers cloudflare-r2-metrics.timer
+sudo systemctl start cloudflare-r2-metrics.service
 systemctl status cloudflare-r2-metrics.service
 journalctl -u cloudflare-r2-metrics.service -n 50 --no-pager
 ```
