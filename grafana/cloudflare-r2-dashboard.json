@@ -482,8 +482,8 @@
       {
         "current": {
           "selected": true,
-          "text": "CHANGE_ME_INFLUX_BUCKET",
-          "value": "CHANGE_ME_INFLUX_BUCKET"
+          "text": "cloudflare-r2",
+          "value": "cloudflare-r2"
         },
         "hide": 0,
         "label": "Influx bucket",
@@ -491,11 +491,11 @@
         "options": [
           {
             "selected": true,
-            "text": "CHANGE_ME_INFLUX_BUCKET",
-            "value": "CHANGE_ME_INFLUX_BUCKET"
+            "text": "cloudflare-r2",
+            "value": "cloudflare-r2"
           }
         ],
-        "query": "CHANGE_ME_INFLUX_BUCKET",
+        "query": "cloudflare-r2",
         "skipUrlSync": false,
         "type": "textbox"
       }
