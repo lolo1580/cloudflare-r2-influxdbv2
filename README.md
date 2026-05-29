@@ -49,6 +49,25 @@ To test without writing to InfluxDB:
 DRY_RUN=1 ./cloudflare-r2-metrics.sh
 ```
 
+## systemd Timer
+
+The repository includes a systemd service and timer for running the script every 15 minutes.
+
+```bash
+sudo cp systemd/cloudflare-r2-metrics.service /etc/systemd/system/
+sudo cp systemd/cloudflare-r2-metrics.timer /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now cloudflare-r2-metrics.timer
+```
+
+Useful checks:
+
+```bash
+systemctl list-timers cloudflare-r2-metrics.timer
+systemctl status cloudflare-r2-metrics.service
+journalctl -u cloudflare-r2-metrics.service -n 50 --no-pager
+```
+
 ## InfluxDB Measurements
 
 - `r2_account_storage`

@@ -1,0 +1,12 @@
+[Unit]
+Description=Run Cloudflare R2 metrics collection every 15 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=15min
+AccuracySec=1min
+Persistent=true
+Unit=cloudflare-r2-metrics.service
+
+[Install]
+WantedBy=timers.target
