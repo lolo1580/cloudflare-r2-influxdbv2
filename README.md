@@ -51,9 +51,11 @@ DRY_RUN=1 ./cloudflare-r2-metrics.sh
 
 ## systemd Timer
 
-The repository includes a systemd service and timer for running the script every 15 minutes. On the monitoring host, update the checkout and install the units:
+The repository includes a systemd service and timer for running the script every 15 minutes. On the target host, clone or update the checkout in `/opt/cloudflare-r2-influxdbv2`, then install the units:
 
 ```bash
+git clone https://github.com/OWNER/cloudflare-r2-influxdbv2.git /opt/cloudflare-r2-influxdbv2
+cd /opt/cloudflare-r2-influxdbv2
 git pull
 sudo cp systemd/cloudflare-r2-metrics.service /etc/systemd/system/
 sudo cp systemd/cloudflare-r2-metrics.timer /etc/systemd/system/
@@ -77,10 +79,7 @@ After=network-online.target
 
 [Service]
 Type=oneshot
-User=laurent
-Group=laurent
-WorkingDirectory=/home/laurent/script/cloudflare-r2
-ExecStart=/usr/bin/env bash /home/laurent/script/cloudflare-r2/cloudflare-r2-metrics.sh
+ExecStart=/usr/bin/env bash /opt/cloudflare-r2-influxdbv2/cloudflare-r2-metrics.sh
 ```
 
 ```bash
@@ -104,7 +103,7 @@ Unit=cloudflare-r2-metrics.service
 WantedBy=timers.target
 ```
 
-Then enable it:
+Adjust `/opt/cloudflare-r2-influxdbv2` if you installed the repository somewhere else. Then enable it:
 
 ```bash
 sudo systemctl daemon-reload
