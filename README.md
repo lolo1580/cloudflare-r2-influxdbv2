@@ -132,7 +132,7 @@ Import steps:
 Dashboards > New > Import > Upload dashboard JSON file
 ```
 
-During import, select your InfluxDB datasource and set the `bucket` variable to the InfluxDB bucket configured in `.env` as `INFLUX_BUCKET`. The dashboard expects Flux queries and the measurements written by this script.
+During import, select your default InfluxDB datasource. The dashboard also exposes a visible `influxdb_datasource` selector at the top, so you can switch between Grafana InfluxDB datasources after import. Set the `bucket` variable to the InfluxDB bucket configured in `.env` as `INFLUX_BUCKET`. The dashboard expects Flux queries and the measurements written by this script.
 
 The dashboard includes total storage, object count, average requests per second, errors, storage by bucket, requests by action/status, and a bucket inventory table.
 
