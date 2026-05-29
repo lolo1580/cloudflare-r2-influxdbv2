@@ -95,11 +95,12 @@ write_influx() {
   require_var INFLUX_BUCKET
   require_var INFLUX_TOKEN
 
-  curl -fsS -X POST \
+  curl -fsS --fail-with-body -X POST \
     "${INFLUX_URL%/}/api/v2/write?org=$(jq -rn --arg v "$INFLUX_ORG" '$v|@uri')&bucket=$(jq -rn --arg v "$INFLUX_BUCKET" '$v|@uri')&precision=s" \
     -H "Authorization: Token $INFLUX_TOKEN" \
     -H "Content-Type: text/plain; charset=utf-8" \
     --data-binary "$payload" >/dev/null
+  printf 'Metrics written to InfluxDB bucket %s.\n' "$INFLUX_BUCKET" >&2
 }
 
 epoch_seconds() {

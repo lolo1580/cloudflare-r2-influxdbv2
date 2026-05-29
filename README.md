@@ -25,7 +25,7 @@ Main variables:
 - `R2_ACCOUNT_STORAGE_METRICS`: set to `0` to skip the REST account storage endpoint.
 - `INFLUX_URL`, `INFLUX_ORG`, `INFLUX_BUCKET`, `INFLUX_TOKEN`: InfluxDB v2 access settings.
 - `R2_LOOKBACK_MINUTES`: lookback window for GraphQL metrics.
-- `DRY_RUN=1`: prints line protocol without writing to InfluxDB.
+- `DRY_RUN=0`: writes metrics to InfluxDB. Set `DRY_RUN=1` only to print line protocol without writing.
 
 ## Cloudflare Permissions
 
