@@ -61,6 +61,56 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now cloudflare-r2-metrics.timer
 ```
 
+Manual install with nano:
+
+```bash
+sudo nano /etc/systemd/system/cloudflare-r2-metrics.service
+```
+
+Paste:
+
+```ini
+[Unit]
+Description=Collect Cloudflare R2 metrics into InfluxDB v2
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=laurent
+Group=laurent
+WorkingDirectory=/home/laurent/script/cloudflare-r2
+ExecStart=/usr/bin/env bash /home/laurent/script/cloudflare-r2/cloudflare-r2-metrics.sh
+```
+
+```bash
+sudo nano /etc/systemd/system/cloudflare-r2-metrics.timer
+```
+
+Paste:
+
+```ini
+[Unit]
+Description=Run Cloudflare R2 metrics collection every 15 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=15min
+AccuracySec=1min
+Persistent=true
+Unit=cloudflare-r2-metrics.service
+
+[Install]
+WantedBy=timers.target
+```
+
+Then enable it:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now cloudflare-r2-metrics.timer
+```
+
 Useful checks and manual run:
 
 ```bash
